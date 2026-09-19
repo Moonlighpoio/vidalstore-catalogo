@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-export interface Game {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  imagen: string | null;
-}
+import { Game } from './entities/game.entity';
 
 @Injectable()
 export class CatalogService {
