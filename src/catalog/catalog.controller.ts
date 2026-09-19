@@ -1,6 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
-import { Game } from './entities/game.entity';
+import type { Game } from './entities/game.entity';
 
 @Controller('catalogo')
 export class CatalogController {
@@ -9,5 +9,16 @@ export class CatalogController {
   @Get()
   findAll(): Game[] {
     return this.catalogService.findAll();
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string): Game {
+    const game = this.catalogService.findById(id);
+    
+    if (!game) {
+      throw new NotFoundException(`Juego ${id} no encontrado`);
+    }
+    
+    return game;
   }
 }
