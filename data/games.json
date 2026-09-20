@@ -1,9 +1,7 @@
 [
   {
     "id": "ftg-540",
-    "nombre": "Overwatch",
-    "descripcion": "A hero-focused first-person team shooter from Blizzard Entertainment.",
-    "imagen": "https://www.freetogame.com/g/540/thumbnail.jpg"
+    "nombre": "Juego actualizado e2e"
   },
   {
     "id": "ftg-516",
@@ -2500,5 +2498,35 @@
     "nombre": "The Lord of the Rings Online",
     "descripcion": "A free to play MMORPG set in the world of J.R.R. Tolkien's \r\nclassic fantasy saga.",
     "imagen": "https://www.freetogame.com/g/251/thumbnail.jpg"
+  },
+  {
+    "id": "ftg-1789874874675",
+    "nombre": "Juego e2e",
+    "descripcion": "Descripción e2e",
+    "imagen": null
+  },
+  {
+    "id": "ftg-1789874888331",
+    "nombre": "Juego e2e",
+    "descripcion": "Descripción e2e",
+    "imagen": null
+  },
+  {
+    "id": "ftg-1789874955147",
+    "nombre": "Juego e2e",
+    "descripcion": "Descripción e2e",
+    "imagen": null
+  },
+  {
+    "id": "ftg-1789875047572",
+    "nombre": "Juego e2e",
+    "descripcion": "Descripción e2e",
+    "imagen": null
+  },
+  {
+    "id": "ftg-1789875101201",
+    "nombre": "Juego e2e",
+    "descripcion": "Descripción e2e",
+    "imagen": null
   }
 ]
