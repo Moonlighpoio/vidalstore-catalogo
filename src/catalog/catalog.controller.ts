@@ -1,6 +1,7 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Post, Body } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
 import type { Game } from './entities/game.entity';
+import { CreateGameDto } from './dto/create-game.dto';
 
 @Controller('catalogo')
 export class CatalogController {
@@ -20,5 +21,17 @@ export class CatalogController {
     }
     
     return game;
+  }
+
+  @Post()
+  create(@Body() createGameDto: CreateGameDto): Game {
+    const game: Game = {
+      id: `ftg-${Date.now()}`,
+      nombre: createGameDto.nombre,
+      descripcion: createGameDto.descripcion,
+      imagen: createGameDto.imagen ?? null,
+    };
+    
+    return this.catalogService.create(game);
   }
 }
