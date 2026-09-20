@@ -1,7 +1,8 @@
-import { Controller, Get, Param, NotFoundException, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Post, Body, Put } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
 import type { Game } from './entities/game.entity';
 import { CreateGameDto } from './dto/create-game.dto';
+import { UpdateGameDto } from './dto/update-game.dto';
 
 @Controller('catalogo')
 export class CatalogController {
@@ -33,5 +34,10 @@ export class CatalogController {
     };
     
     return this.catalogService.create(game);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto): Game {
+    return this.catalogService.update(id, updateGameDto);
   }
 }

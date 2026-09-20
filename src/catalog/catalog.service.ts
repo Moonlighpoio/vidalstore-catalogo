@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Game } from './entities/game.entity';
+import type { UpdateGameDto } from './dto/update-game.dto';
 
 @Injectable()
 export class CatalogService {
@@ -19,6 +20,23 @@ export class CatalogService {
     this.games.push(game);
     this.persist();
     return game;
+  }
+
+  update(id: string, changes: UpdateGameDto): Game {
+    const index = this.games.findIndex((game) => game.id === id);
+    
+    if (index === -1) {
+      throw new NotFoundException(`Juego ${id} no encontrado`);
+    }
+    
+    this.games[index] = {
+      ...this.games[index],
+      ...changes,
+      id,
+    };
+    
+    this.persist();
+    return this.games[index];
   }
 
   private load(): Game[] {
