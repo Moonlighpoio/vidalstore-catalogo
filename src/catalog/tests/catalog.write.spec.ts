@@ -19,8 +19,18 @@ describe('CatalogController - Write Operations', () => {
     findAll: jest.fn(() => []),
     findById: jest.fn((id: string) => (id === 'ftg-999' ? mockGame : undefined)),
     create: jest.fn((game) => game),
-    update: jest.fn((id, changes) => ({ ...mockGame, ...changes })),
-  };
+    update: jest.fn((id: string, changes: Partial<typeof mockGame>) => {
+  if (id !== mockGame.id) {
+    throw new NotFoundException(`Juego ${id} no encontrado`);
+  }
+
+  return {
+    ...mockGame,
+    ...changes,
+    id,
+};
+}),
+};
 
   const mockGuard = {
     canActivate: jest.fn(() => true),
