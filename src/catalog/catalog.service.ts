@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { Game } from './entities/game.entity';
+import type { Game } from './entities/game.entity';
 
 @Injectable()
 export class CatalogService {
-  private readonly games: Game[] = this.load();
+  private games: Game[] = this.load();
 
   findAll(): Game[] {
     return this.games;
@@ -13,6 +13,12 @@ export class CatalogService {
 
   findById(id: string): Game | undefined {
     return this.games.find((game) => game.id === id);
+  }
+
+  create(game: Game): Game {
+    this.games.push(game);
+    this.persist();
+    return game;
   }
 
   private load(): Game[] {
@@ -23,5 +29,10 @@ export class CatalogService {
     } catch {
       return [];
     }
+  }
+
+  private persist(): void {
+    const filePath = resolve(process.cwd(), 'data/games.json');
+    writeFileSync(filePath, JSON.stringify(this.games, null, 2), 'utf-8');
   }
 }
