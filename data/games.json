@@ -2528,5 +2528,17 @@
     "nombre": "Juego e2e",
     "descripcion": "Descripción e2e",
     "imagen": null
+  },
+  {
+    "id": "732c3d14-d66e-4dc7-bc7d-06d30b5ba7ea",
+    "nombre": "Test editor",
+    "descripcion": "Desc",
+    "imagen": null
+  },
+  {
+    "id": "d5ed9745-cff3-4ee6-bf36-e2ec32dffc7f",
+    "nombre": "Juego via BFF",
+    "descripcion": "OK",
+    "imagen": null
   }
 ]

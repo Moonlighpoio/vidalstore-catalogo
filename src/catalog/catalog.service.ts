@@ -25,7 +25,7 @@ export class CatalogService {
   const game: Game = {
     id: crypto.randomUUID(),
     nombre: dto.nombre,
-    descripcion: dto.descripcion,
+    descripcion: dto.descripcion ?? '',
     imagen: dto.imagen ?? null,
   };
 
