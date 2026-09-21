@@ -3,10 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
-  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -36,7 +36,13 @@ export class CatalogController {
 
   @Get(':id')
   findById(@Param('id') id: string) {
-    return this.catalogService.findById(id);
+    const game = this.catalogService.findById(id);
+
+    if (!game) {
+      throw new NotFoundException(`Juego ${id} no encontrado`);
+    }
+
+    return game;
   }
 
   @Post()

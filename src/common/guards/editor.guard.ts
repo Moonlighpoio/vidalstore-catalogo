@@ -3,22 +3,31 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
 
-interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest {
   user?: {
-    'cognito:groups'?: string[];
+    sub: string;
+    groups: string[];
   };
 }
 
 @Injectable()
 export class EditorGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean {
     const request =
       context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    const groups = request.user?.['cognito:groups'] ?? [];
+    if (!request.user) {
+      throw new UnauthorizedException(
+        'Authenticated user is required',
+      );
+    }
+
+    const groups = request.user.groups ?? [];
 
     const isEditor = groups.includes('editores');
     const isAdmin = groups.includes('administradores');
