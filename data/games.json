@@ -1,7 +1,9 @@
 [
   {
     "id": "ftg-540",
-    "nombre": "Juego actualizado e2e"
+    "nombre": "Overwatch",
+    "descripcion": "A hero-focused first-person team shooter from Blizzard Entertainment.",
+    "imagen": "https://www.freetogame.com/g/540/thumbnail.jpg"
   },
   {
     "id": "ftg-516",
@@ -2498,47 +2500,5 @@
     "nombre": "The Lord of the Rings Online",
     "descripcion": "A free to play MMORPG set in the world of J.R.R. Tolkien's \r\nclassic fantasy saga.",
     "imagen": "https://www.freetogame.com/g/251/thumbnail.jpg"
-  },
-  {
-    "id": "ftg-1789874874675",
-    "nombre": "Juego e2e",
-    "descripcion": "Descripción e2e",
-    "imagen": null
-  },
-  {
-    "id": "ftg-1789874888331",
-    "nombre": "Juego e2e",
-    "descripcion": "Descripción e2e",
-    "imagen": null
-  },
-  {
-    "id": "ftg-1789874955147",
-    "nombre": "Juego e2e",
-    "descripcion": "Descripción e2e",
-    "imagen": null
-  },
-  {
-    "id": "ftg-1789875047572",
-    "nombre": "Juego e2e",
-    "descripcion": "Descripción e2e",
-    "imagen": null
-  },
-  {
-    "id": "ftg-1789875101201",
-    "nombre": "Juego e2e",
-    "descripcion": "Descripción e2e",
-    "imagen": null
-  },
-  {
-    "id": "732c3d14-d66e-4dc7-bc7d-06d30b5ba7ea",
-    "nombre": "Test editor",
-    "descripcion": "Desc",
-    "imagen": null
-  },
-  {
-    "id": "d5ed9745-cff3-4ee6-bf36-e2ec32dffc7f",
-    "nombre": "Juego via BFF",
-    "descripcion": "OK",
-    "imagen": null
   }
 ]
