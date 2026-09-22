@@ -1,268 +1,208 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# VidalStore — Catálogo
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Microservicio de catálogo de videojuegos de la plataforma **VidalStore**. Se encarga de listar, consultar, crear, editar y eliminar los juegos a la venta, y persiste su estado en un repositorio en memoria respaldado por el archivo `data/games.json`.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-# VidalStore - Catálogo Service
-
-Microservicio de catálogo de juegos para VidalStore.
+VidalStore vende **licencias de uso de videojuegos digitales**: el usuario navega el catálogo, compra un juego y el backend le asocia una licencia en su biblioteca.
 
 ## Arquitectura
 
-┌─────────────────────┐
+El catálogo es la capa de datos más profunda del flujo: nunca es llamado directamente por el navegador.
 
-│ Angular (Front) │
+```text
+Navegador (Angular)  :4200
+      │  Authorization: Bearer <access token>
+      ▼
+API Gateway (NestJS) :8080   ← valida el JWT contra el JWKS de AWS Cognito
+      │  Authorization + x-user-sub + x-user-groups
+      ▼
+BFF (NestJS)         :3000   ← autoriza por grupo de Cognito y enruta
+      │  Authorization + x-user-sub + x-user-groups
+      ▼
+Catálogo (este repo) :8001   ← entrega los juegos
+```
 
-└──────────┬──────────┘
+> El microservicio no configura CORS. El único origen permitido lo gestiona el API Gateway.
 
-│
+## Funcionalidad
 
-▼
+- Listado paginado del catálogo de juegos (`GET /v1/catalogo`).
+- Búsqueda de un juego por su ID (`GET /v1/catalogo/:id`).
+- Creación, edición y eliminación de juegos con autorización por grupos.
+- Seed de datos desde la API pública **FreeToGame** (`npm run seed`).
+- Repositorio en memoria que persiste los cambios en `data/games.json`.
+- Validación estricta de DTOs (se rechazan campos desconocidos).
+- Endpoint de health check público.
 
-┌─────────────────────┐
+## Tecnologías
 
-│ API Gateway │ ← Valida token contra JWKS
-
-└──────────┬──────────┘
-
-│
-
-▼
-
-┌─────────────────────┐
-
-│ BFF │ ← Autoriza por grupos
-
-└──────────┬──────────┘
-
-│
-
-▼
-
-┌─────────────────────┐
-
-│ Catálogo Service │ ← Este repositorio
-
-└─────────────────────┘
-
+- NestJS + TypeScript.
+- `@nestjs/config` para variables de entorno y `class-validator` para los DTOs.
+- Axios (seed y consumo de la API externa).
+- Jest (pruebas unitarias y e2e) y Oxlint (linting).
+- AWS Cognito: el servicio confía en los headers del BFF (no valida el JWT por sí mismo).
 
 ## Requisitos
 
-- Node.js 18+
-- npm o yarn
+- Node.js 18 o superior.
+- npm.
+- Un BFF corriendo (o un cliente HTTP que envíe los headers `x-user-sub` y `x-user-groups`).
 
 ## Instalación
 
 ```bash
+git clone https://github.com/wsk4/vidalstore-catalogo.git
+cd vidalstore-catalogo
 npm install
 ```
 
-## Variables de entorno
-
-Copiar `.env.example` a `.env` y ajustar valores:
+Crea el archivo de entorno local:
 
 ```bash
 cp .env.example .env
 ```
 
-**Variables requeridas**:
+## Variables de entorno
 
-```env
-PORT=3002
-NODE_ENV=development
+| Variable | Descripción | Valor por defecto |
+|---|---|---|
+| `PORT` | Puerto del servicio. | `8001` |
+| `NODE_ENV` | Entorno de ejecución. | `development` |
+| `COGNITO_REGION` | Región del user pool (contexto). | `us-east-1` |
+| `COGNITO_USER_POOL_ID` | ID del user pool (contexto). | — |
+| `COGNITO_APP_CLIENT_ID` | ID del app client (contexto). | — |
+| `COGNITO_ISSUER` | Issuer del user pool (contexto). | — |
+| `COGNITO_JWKS_URI` | URI del well-known JWKS (contexto). | — |
+| `MAX_GAMES_PER_PAGE` | Tope de juegos por página. | `50` |
+| `CACHE_TTL_SECONDS` | TTL de caché en segundos. | `300` |
+| `EXTERNAL_GAMES_API_URL` | URL de la API FreeToGame usada por el seed. | — |
 
-# Cognito configuration
-COGNITO_REGION=us-east-1
-COGNITO_USER_POOL_ID=us-east-1_example
-COGNITO_APP_CLIENT_ID=example-client-id
-COGNITO_ISSUER=[https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example](https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example)
-COGNITO_JWKS_URI=[https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example/.well-known/jwks.json](https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example/.well-known/jwks.json)
+Nunca se versiona un `.env` con valores reales ni credenciales de AWS.
 
-# Internal settings
-MAX_GAMES_PER_PAGE=50
-CACHE_TTL_SECONDS=300
-```
-
-## Levantar el servicio
+## Ejecución
 
 ```bash
+# desarrollo con recarga
 npm run start:dev
+
+# compilación y producción
+npm run build
+npm run start:prod
 ```
 
-El servicio estará disponible en `http://localhost:3002`
+El servicio queda disponible en `http://localhost:8001`.
 
-## Ejecutar seed
+### Cargar datos iniciales (seed)
 
 ```bash
 npm run seed
 ```
 
-Esto generará:
-- `data/games.json` → Juegos desde FreeToGame API
-
-## Pruebas
-
-```bash
-# Pruebas unitarias
-npm test
-
-# Pruebas e2e
-npm run test:e2e
-```
+Descarga los juegos desde la API FreeToGame y genera `data/games.json`.
 
 ## Endpoints
 
 | Método | Ruta | Descripción | Autorización |
-|--------|------|-------------|--------------|
-| `GET` | `/health` | Health check | Público |
-| `GET` | `/v1/catalogo` | Lista todos los juegos | Sesión válida |
-| `GET` | `/v1/catalogo/:id` | Busca juego por ID | Sesión válida |
-| `POST` | `/v1/catalogo` | Crea nuevo juego | `editores`, `administradores` |
-| `PUT` | `/v1/catalogo/:id` | Actualiza juego | `editores`, `administradores` |
-| `DELETE` | `/v1/catalogo/:id` | Elimina juego | `administradores` |
+|---|---|---|---|
+| `GET` | `/health` | Health check. | Público |
+| `GET` | `/v1/catalogo` | Lista el catálogo. | Header `x-user-sub` presente (401 si falta) |
+| `GET` | `/v1/catalogo/:id` | Busca un juego por ID (404 si no existe). | Header `x-user-sub` presente |
+| `POST` | `/v1/catalogo` | Crea un juego. | `editores` o `administradores` |
+| `PUT` | `/v1/catalogo/:id` | Actualiza un juego. | `editores` o `administradores` |
+| `DELETE` | `/v1/catalogo/:id` | Elimina un juego. | `editores` o `administradores` |
 
-## Ejemplos de curl
+### Autenticación y autorización
 
-### Health check
+El microservicio asume que ya fue autenticado por el Gateway y autorizado por el BFF:
 
-```bash
-curl -i http://localhost:3002/health
-```
+- `TokenPresenceGuard` exige el header `x-user-sub` → `401 Unauthorized` si no viene.
+- `EditorGuard` exige que el grupo `x-user-groups` contenga `editores` o `administradores` para escrituras → `403 Forbidden` si no alcanza.
+- `GET /v1/catalogo` responde `401` sin `x-user-sub` y `200` con uno válido.
 
-**Respuesta esperada**:
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"status":"ok","service":"vidalstore-catalogo","timestamp":"2026-09-20T13:00:00.000Z"}
-```
-
-### Catálogo sin token (401)
+### Ejemplos con curl
 
 ```bash
-curl -i http://localhost:3002/v1/catalogo
-```
+# Health check (público)
+curl -i http://localhost:8001/health
 
-**Respuesta esperada**:
+# Catálogo sin autenticación → 401
+curl -i http://localhost:8001/v1/catalogo
 
-```http
-HTTP/1.1 401 Unauthorized
-```
+# Catálogo con headers del BFF → 200
+curl -i http://localhost:8001/v1/catalogo \
+  -H "x-user-sub: user-123" \
+  -H "x-user-groups: jugadores"
 
-### Catálogo con token (200)
-
-```bash
-curl -i \
-  http://localhost:3002/v1/catalogo \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
-```
-
-**Respuesta esperada**:
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-[{"id":"game-1","name":"Game Name","description":"Description","image":"[https://](https://)..."}]
-```
-
-### Crear juego sin rol (403)
-
-```bash
-curl -i \
-  -X POST http://localhost:3002/v1/catalogo \
+# Crear juego con rol de jugador → 403
+curl -i -X POST http://localhost:8001/v1/catalogo \
+  -H "x-user-sub: user-123" \
+  -H "x-user-groups: jugadores" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $PLAYER_TOKEN" \
-  -d '{"name":"New Game","description":"Description","image":"[https://](https://)..."}'
-```
+  -d '{"nombre":"Nuevo juego"}'
 
-**Respuesta esperada**:
-
-```http
-HTTP/1.1 403 Forbidden
-```
-
-### Crear juego con rol editor (201)
-
-```bash
-curl -i \
-  -X POST http://localhost:3002/v1/catalogo \
+# Crear juego con rol de editor → 201
+curl -i -X POST http://localhost:8001/v1/catalogo \
+  -H "x-user-sub: user-123" \
+  -H "x-user-groups: editores" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $EDITOR_TOKEN" \
-  -d '{"name":"New Game","description":"Description","image":"[https://](https://)..."}'
+  -d '{"nombre":"Nuevo juego","descripcion":"Demo","imagen":"https://..."}'
 ```
-
-**Respuesta esperada**:
-
-```http
-HTTP/1.1 201 Created
-Content-Type: application/json
-
-{"id":"game-2","name":"New Game","description":"Description","image":"[https://](https://)..."}
-```
-
-## Flujo de autenticación
-
-1. **Usuario se autentica en Cognito** → Obtiene token con `cognito:groups`
-2. **Frontend envía petición** → Agrega token en `Authorization: Bearer <token>`
-3. **API Gateway valida token** → Verifica firma, emisor, vigencia, client_id
-4. **BFF autoriza por grupo** → `403` si el rol no alcanza
-5. **Microservicio entrega datos** → Retorna juegos del catálogo
 
 ## Códigos de respuesta
 
 | Código | Significado | Cuándo se usa |
-|--------|-------------|---------------|
-| `200 OK` | Éxito | Lectura exitosa |
-| `201 Created` | Recurso creado | POST exitoso |
-| `204 No Content` | Sin contenido | DELETE exitoso |
-| `401 Unauthorized` | No autenticado | Token ausente o inválido |
-| `403 Forbidden` | No autorizado | Rol insuficiente |
-| `404 Not Found` | No encontrado | Juego no existe |
+|---|---|---|
+| `200 OK` | Éxito | Lecturas y actualizaciones exitosas. |
+| `201 Created` | Recurso creado | `POST /v1/catalogo`. |
+| `401 Unauthorized` | No autenticado | Falta `x-user-sub`. |
+| `403 Forbidden` | No autorizado | Rol insuficiente para escritura. |
+| `404 Not Found` | No encontrado | ID de juego inexistente. |
 
-## Seguridad
+## Pruebas
 
-- ✅ No commitear `.env` con valores reales
-- ✅ No commitear credenciales de AWS
-- ✅ Los IDs de User Pool y App Client son públicos
-- ✅ Validar token en Gateway, BFF y microservicio
-- ✅ Autorizar por `cognito:groups` para operaciones de escritura
+```bash
+npm test          # pruebas unitarias
+npm run test:watch
+npm run test:cov  # con cobertura
+npm run test:e2e  # pruebas e2e
+npm run lint      # oxlint
+```
 
 ## Scripts disponibles
 
 ```bash
-npm run build        # Compilar TypeScript
-npm run start:dev    # Levantar en desarrollo
-npm run start:prod   # Levantar en producción
-npm test             # Ejecutar pruebas unitarias
-npm run test:e2e     # Ejecutar pruebas e2e
-npm run seed         # Generar datos desde FreeToGame API
-npm run lint         # Ejecutar linter
+npm run build        # compilar TypeScript
+npm run start:dev    # desarrollo con watch
+npm run start:prod   # producción
+npm run seed         # seed desde FreeToGame API
+npm test             # pruebas unitarias
+npm run test:e2e     # pruebas e2e
+npm run lint         # oxlint
+npm run format       # prettier
+```
+
+## Estructura del proyecto
+
+```text
+src/
+├── catalog/
+│   ├── dto/                    # CreateGameDto, UpdateGameDto
+│   ├── entities/               # GameEntity
+│   ├── repositories/           # InMemoryGameRepository
+│   ├── catalog.controller.ts
+│   ├── catalog.module.ts
+│   └── catalog.service.ts
+├── common/
+│   ├── filters/                # HttpExceptionFilter
+│   └── guards/                 # TokenPresenceGuard, EditorGuard
+├── data/                       # cliente de la API FreeToGame
+├── health/                     # health check
+├── app.module.ts
+└── main.ts
+
+data/                           # seed y data/games.json
+test/                           # pruebas e2e
 ```
 
 ## Licencia
 
-Proyecto académico DUOC UC - DSY1107 - Desarrollo Cloud Native I
+Proyecto académico DUOC UC — DSY1107 Desarrollo Cloud Native I.
