@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CatalogModule } from './catalog/catalog.module';
 import { HealthController } from './health/health.controller';
-import { ConfigModule } from '@nestjs/config';
-
+import { MensajeriaModule } from './mensajeria/mensajeria.module';
 
 @Module({
   imports: [
@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
     }),
     CatalogModule,
+    MensajeriaModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

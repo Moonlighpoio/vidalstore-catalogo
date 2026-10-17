@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -47,16 +48,25 @@ export class CatalogController {
 
   @Post()
   @UseGuards(EditorGuard)
-  create(@Body() dto: CreateGameDto) {
-    return this.catalogService.create(dto);
+  create(
+    @Body() dto: CreateGameDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    const editorSub = request.user?.sub;
+
+    if (!editorSub) {
+      throw new UnauthorizedException('Editor subject is required');
+    }
+
+    return this.catalogService.create({
+      ...dto,
+      editorSub,
+    });
   }
 
   @Put(':id')
   @UseGuards(EditorGuard)
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateGameDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateGameDto) {
     return this.catalogService.update(id, dto);
   }
 

@@ -18,7 +18,7 @@ describe('CatalogController - Write Operations', () => {
   const mockService = {
     findAll: jest.fn(() => []),
     findById: jest.fn((id: string) => (id === 'ftg-999' ? mockGame : undefined)),
-    create: jest.fn((game) => game),
+    create: jest.fn(async (game) => game),
     update: jest.fn((id: string, changes: Partial<typeof mockGame>) => {
   if (id !== mockGame.id) {
     throw new NotFoundException(`Juego ${id} no encontrado`);
@@ -55,20 +55,20 @@ describe('CatalogController - Write Operations', () => {
   });
 
   describe('create', () => {
-    it('debería crear un nuevo juego', () => {
+    it('debería crear un nuevo juego', async () => {
       const createDto = {
         nombre: 'Nuevo juego',
         descripcion: 'Nueva descripción',
       };
 
-      const result = controller.create(createDto);
+      const result = controller.create(createDto, { user: { sub: "editor-001", groups: ["editores"] } } as any);
 
-      expect(result.nombre).toBe('Nuevo juego');
-      expect(result.descripcion).toBe('Nueva descripción');
+      await expect(result).resolves.toBeDefined();
       expect(service.create).toHaveBeenCalledWith(
         expect.objectContaining({
           nombre: 'Nuevo juego',
           descripcion: 'Nueva descripción',
+          editorSub: 'editor-001',
         }),
       );
     });
